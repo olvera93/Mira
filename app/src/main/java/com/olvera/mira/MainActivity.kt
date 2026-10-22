@@ -42,6 +42,9 @@ class MainActivity : ComponentActivity() {
                         uiState = uiState,
                         onNext = onboardingViewModel::nextStep,
                         onPrevious = onboardingViewModel::previousStep,
+                        onToggleInterest = onboardingViewModel::toggleInterest,
+                        onSelectLevel = onboardingViewModel::selectLevel,
+                        onSetDailyMinutes = onboardingViewModel::setDailyMinutes,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
