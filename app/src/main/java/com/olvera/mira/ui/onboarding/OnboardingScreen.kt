@@ -16,12 +16,18 @@ import com.olvera.mira.domain.model.PhotographyInterest
 import com.olvera.mira.domain.model.PhotographyLevel
 import com.olvera.mira.ui.theme.MiraCream
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.olvera.mira.ui.onboarding.components.SelectableOptionCard
 import com.olvera.mira.ui.theme.MiraInk
+import com.olvera.mira.ui.theme.MiraLime
 import com.olvera.mira.ui.theme.MiraMuted
 
 @Composable
@@ -74,84 +80,147 @@ fun OnboardingScreen(
             }
 
             1 -> {
+
                 Text(
-                    text = "¿Qué te gustaría aprender?",
-                    style = MaterialTheme.typography.headlineMedium
+                    text = "¿Qué te gustaría fotografiar",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MiraInk
                 )
 
                 Text(
-                    text = "Selecciona todos los temas que te interesen."
+                    text = "Elige los temas que te inspiren. " +
+                            "Personalizaremos tus primeras misiones.",
+                    color = MiraMuted
                 )
+
+                val interest = PhotographyInterest.entries
 
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    PhotographyInterest.entries.forEach { interest ->
-                        FilterChip(
-                            selected = interest in uiState.selectedInterests,
-                            onClick = {
-                                onToggleInterest(interest)
-                            },
-                            label = {
-                                Text(interest.toDisplayName())
+
+                    interest.chunked(2).forEach { rowInterests ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+
+                            rowInterests.forEach { interest ->
+                                SelectableOptionCard(
+                                    title = interest.toDisplayName(),
+                                    description = interest.toDescription(),
+                                    selected = interest in uiState.selectedInterests,
+                                    onClick = {
+                                        onToggleInterest(interest)
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
                             }
-                        )
+
+                            if (rowInterests.size == 1) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
                     }
                 }
 
-                Button(onClick = onPrevious) {
-                    Text("Atrás")
-                }
-
-                Button(
-                    onClick = onNext,
-                    enabled = uiState.selectedInterests.isNotEmpty()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("Continuar")
+
+                    OutlinedButton(
+                        onClick = onPrevious,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Atrás")
+                    }
+
+                    Button(
+                        onClick = onNext,
+                        enabled = uiState.selectedInterests.isNotEmpty(),
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MiraLime,
+                            contentColor = MiraInk
+                        )
+                    ) {
+                        Text("Continuar")
+                    }
+
                 }
             }
 
             2 -> {
-                Text(
-                    text = "Define tu aventura.",
-                    style = MaterialTheme.typography.headlineMedium
-                )
 
-                Text(text = "¿Cuál es tu nivel fotográfico?")
 
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+
+                    Text(
+                        text = "Define tu aventura",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MiraInk
+                    )
+
+                    Text(
+                        text = "Adaptaremos los retos a tu experiencia y al tiempo que tengas.",
+                        color = MiraMuted
+                    )
+
+                    Text(
+                        text = "¿Cuál es tu nivel?",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MiraInk
+                    )
+
                     PhotographyLevel.entries.forEach { level ->
-                        FilterChip(
+                        SelectableOptionCard(
+                            title = level.toDisplayName(),
+                            description = level.toDescription(),
                             selected = uiState.level == level,
-                            onClick = { onSelectLevel(level) },
-                            label = {
-                                Text(level.toDisplayName())
-                            }
-                        )
-                    }
-                }
-
-                Text("¿Cuánto tiempo quieres dedicar al día?")
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    listOf(5, 10, 15, 20, 30).forEach { minutes ->
-                        FilterChip(
-                            selected = uiState.dailyMinutes == minutes,
                             onClick = {
-                                onSetDailyMinutes(minutes)
-                            },
-                            label = {
-                                Text("$minutes min")
+                                onSelectLevel(level)
                             }
                         )
                     }
                 }
 
-                Button(onClick = onPrevious) {
+                Text(
+                    text = "¿Cuánto tiempo tienes al día?",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MiraInk
+                )
+
+                listOf(5, 10, 15, 20, 30).chunked(3).forEach { rowMinutes ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        rowMinutes.forEach { minutes ->
+                            FilterChip(
+                                selected = uiState.dailyMinutes == minutes,
+                                onClick = {
+                                    onSetDailyMinutes(minutes)
+                                },
+                                label = {
+                                    Text("${minutes} min")
+                                }
+                            )
+                        }
+                    }
+                }
+
+                OutlinedButton(
+                    onClick = onPrevious,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("Atrás")
                 }
             }
@@ -185,4 +254,37 @@ private fun PhotographyLevel.toDisplayName(): String =
         PhotographyLevel.BEGINNER -> "Principiante"
         PhotographyLevel.HOBBYIST -> "Aficionado"
         PhotographyLevel.ADVANCED -> "Avanzado"
+    }
+
+private fun PhotographyInterest.toDescription(): String =
+    when (this) {
+        PhotographyInterest.COMPOSITION ->
+            "Ordena los elementos y guía la mirada."
+
+        PhotographyInterest.LIGHT_AND_SHADOW ->
+            "Descubre formas creadas por la luz."
+
+        PhotographyInterest.ARCHITECTURE ->
+            "Explora edificios, líneas y perspectivas."
+
+        PhotographyInterest.COLORS ->
+            "Juega con contrastes y tonos."
+
+        PhotographyInterest.REFLECTIONS ->
+            "Busca escenas en charcos y ventanas."
+
+        PhotographyInterest.STREET_PHOTOGRAPHY ->
+            "Cuenta historias de la vida urbana."
+    }
+
+private fun PhotographyLevel.toDescription(): String =
+    when (this) {
+        PhotographyLevel.BEGINNER ->
+            "Estoy empezando y quiero aprender desde cero."
+
+        PhotographyLevel.HOBBYIST ->
+            "Ya tomo fotos y quiero mejorar mi técnica."
+
+        PhotographyLevel.ADVANCED ->
+            "Quiero experimentar con técnicas más complejas."
     }
