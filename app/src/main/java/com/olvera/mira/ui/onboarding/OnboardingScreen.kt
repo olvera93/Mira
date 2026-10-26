@@ -38,6 +38,7 @@ fun OnboardingScreen(
     onToggleInterest: (PhotographyInterest) -> Unit,
     onSelectLevel: (PhotographyLevel) -> Unit,
     onSetDailyMinutes: (Int) -> Unit,
+    onComplete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -153,75 +154,105 @@ fun OnboardingScreen(
             }
 
             2 -> {
-
-
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-
-                    Text(
-                        text = "Define tu aventura",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MiraInk
-                    )
-
-                    Text(
-                        text = "Adaptaremos los retos a tu experiencia y al tiempo que tengas.",
-                        color = MiraMuted
-                    )
-
-                    Text(
-                        text = "¿Cuál es tu nivel?",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MiraInk
-                    )
-
-                    PhotographyLevel.entries.forEach { level ->
-                        SelectableOptionCard(
-                            title = level.toDisplayName(),
-                            description = level.toDescription(),
-                            selected = uiState.level == level,
-                            onClick = {
-                                onSelectLevel(level)
-                            }
-                        )
-                    }
-                }
-
-                Text(
-                    text = "¿Cuánto tiempo tienes al día?",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MiraInk
-                )
-
-                listOf(5, 10, 15, 20, 30).chunked(3).forEach { rowMinutes ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    // Contenido desplazable
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        rowMinutes.forEach { minutes ->
-                            FilterChip(
-                                selected = uiState.dailyMinutes == minutes,
-                                onClick = {
-                                    onSetDailyMinutes(minutes)
-                                },
-                                label = {
-                                    Text("${minutes} min")
+                        Text(
+                            text = "Define tu aventura",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MiraInk
+                        )
+
+                        Text(
+                            text = "Adaptaremos los retos a tu experiencia y al tiempo que tengas.",
+                            color = MiraMuted
+                        )
+
+                        Text(
+                            text = "¿Cuál es tu nivel?",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MiraInk
+                        )
+
+                        PhotographyLevel.entries.forEach { level ->
+                            SelectableOptionCard(
+                                title = level.toDisplayName(),
+                                description = level.toDescription(),
+                                selected = uiState.level == level,
+                                onClick = { onSelectLevel(level) }
+                            )
+                        }
+
+                        Text(
+                            text = "¿Cuánto tiempo tienes al día?",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MiraInk
+                        )
+
+                        listOf(5, 10, 15, 20, 30).chunked(3).forEach { rowMinutes ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                rowMinutes.forEach { minutes ->
+                                    FilterChip(
+                                        selected = uiState.dailyMinutes == minutes,
+                                        onClick = { onSetDailyMinutes(minutes) },
+                                        label = { Text("$minutes min") }
+                                    )
                                 }
+                            }
+                        }
+
+                        uiState.errorMessage?.let { message ->
+                            Text(
+                                text = message,
+                                color = MaterialTheme.colorScheme.error
                             )
                         }
                     }
-                }
 
-                OutlinedButton(
-                    onClick = onPrevious,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Atrás")
+                    OutlinedButton(
+                        onClick = onPrevious,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    ) {
+                        Text("Atrás")
+                    }
+
+                    Button(
+                        onClick = onComplete,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, bottom = 8.dp),
+                        enabled = !uiState.isSaving &&
+                                !uiState.isCheckingPreferences &&
+                                uiState.selectedInterests.isNotEmpty(),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MiraLime,
+                            contentColor = MiraInk
+                        )
+                    ) {
+                        Text(
+                            if (uiState.isSaving) {
+                                "Guardando..."
+                            } else {
+                                "Crear mi primer reto"
+                            }
+                        )
+                    }
                 }
             }
         }
