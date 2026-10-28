@@ -10,5 +10,7 @@ data class OnboardingUiState(
     val level: PhotographyLevel = PhotographyLevel.BEGINNER,
     val dailyMinutes: Int = 10,
     val isSaving: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isCompleted: Boolean = false,
+    val isCheckingPreferences: Boolean = true
 )
